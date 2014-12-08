@@ -1,5 +1,5 @@
 [package]
 
-name = "temp"
+name = "suggest_tree"
 version = "0.0.1"
 authors = ["foodhype <brianschmitz.main@gmail.com>"]

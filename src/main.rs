@@ -10,24 +10,52 @@ struct SuggestTree<'a> {
 
 
 struct CompletionTrie<'a> {
-    children: HashMap<&'a str, Option<&'a CompletionTrie<'a>>>,
+    children: HashMap<char, Option<&'a CompletionTrie<'a>>>,
 }
 
-
-impl<'a> SuggestTree<'a> {
-/*    fn new() -> SuggestTree<'a> {
-        SuggestTree<'a> {
-            root: CompletionTrie<'a>,
+impl<'a> CompletionTrie<'a> {
+    fn new() -> CompletionTrie<'a> {
+        CompletionTrie {
+            children: HashMap::new(),
         }
     }
-*/
-    fn insert(&self, word: &str, index: uint) {
 
+    fn add(&self, word: &str, index: uint) {
+        let mut x = self;
+        for letter in word.chars() {
+            if !x.children.contains_key(&letter) {
+                x.children.insert(letter, Some(CompletionTrie::new()));
+            }
+
+            let x = match x.children.get(&letter) {
+                Some(n) => n,
+                None => {
+                    return;
+                }
+            };
+            println!("{}", letter);
+        }
+    }
+}   
+
+impl<'a> SuggestTree<'a> {
+    fn new() -> SuggestTree<'a> {
+        SuggestTree {
+            root: CompletionTrie::new(),
+            completion_table: Vec::new(),
+            inverted_index: HashMap::new(),
+            last_index: 0
+        }
     }
 
+    fn insert(&self, word: &str, index: uint) {
+    
+    }
 }
 
-
 fn main() {
-    println!("Hello, world!")
+    let mut x = CompletionTrie::new();
+    let y = CompletionTrie::new();
+    //x.children.insert("YOLO", Some(&y));
+    x.add("hello", 0);
 }
