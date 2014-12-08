@@ -10,7 +10,7 @@ struct SuggestTree<'a> {
 
 
 struct CompletionTrie<'a> {
-    children: HashMap<char, Option<&'a CompletionTrie<'a>>>,
+    children: HashMap<char, Box<CompletionTrie<'a>>>,
 }
 
 impl<'a> CompletionTrie<'a> {
@@ -20,19 +20,13 @@ impl<'a> CompletionTrie<'a> {
         }
     }
 
-    fn add(&self, word: &str, index: uint) {
+    fn add(& mut self, word: &str, index: uint) {
         let mut x = self;
         for letter in word.chars() {
             if !x.children.contains_key(&letter) {
-                x.children.insert(letter, Some(CompletionTrie::new()));
+                x.children.insert(letter, box CompletionTrie::new());
             }
-
-            let x = match x.children.get(&letter) {
-                Some(n) => n,
-                None => {
-                    return;
-                }
-            };
+            
             println!("{}", letter);
         }
     }
