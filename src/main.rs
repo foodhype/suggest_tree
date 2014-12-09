@@ -33,10 +33,7 @@ impl<'a> CompletionTrie<'a> {
         }
       
         let mut y = match self.children.get_mut(&letter) {
-            Some(n) => n,
-            None => {
-                return;
-            }
+            n => n,
         };
 
         self.completion_weights.insert(index, 1); 
@@ -51,10 +48,7 @@ impl<'a> CompletionTrie<'a> {
         let letter = prefix.char_at(0);
 
         match self.children.get_mut(&letter) {
-            Some(n) => return n.getCompletionTrieNode(prefix.slice(1, prefix.len())),
-            None => {
-                return None
-            }
+            n => return n.getCompletionTrieNode(prefix.slice(1, prefix.len())),
         };
 
     }
@@ -97,6 +91,7 @@ impl<'a> SuggestTree<'a> {
 fn main() {
     let mut y = SuggestTree::new();
     y.add("hello");
+    y.add("helloworld");
     let d = y.get_weights("hell");
     for (k, v) in d.iter() {
         println!("Words for prefix hell: {}", k);
