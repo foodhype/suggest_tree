@@ -1,13 +1,10 @@
 use std::collections::HashMap;
 use std::io::BufferedReader;
 use std::io::File;
-use std::str::StrSlice;
-
-
 
 struct SuggestTree<'a> {
     root: CompletionTrie<'a>,
-    completion_table: Vec<Box<&'a str>>,
+    completion_table: Vec<String>,
     //inverted_index: HashMap<&'a str, uint>,
     last_index: uint
 }
@@ -26,7 +23,7 @@ impl<'a> CompletionTrie<'a> {
         }
     }
 
-    fn add(&mut self, word: Box<&str>, index: uint) {
+    fn add(&mut self, word: &str, index: uint) {
         if word.len() == 0 {
             return;
         }
@@ -37,11 +34,14 @@ impl<'a> CompletionTrie<'a> {
         }
       
         let mut y = match self.children.get_mut(&letter) {
-            n => n,
+            Some(n) => n,
+            None => {
+                return;
+            }
         };
 
         self.completion_weights.insert(index, 1); 
-        y.add(box word.slice(1, word.len()), index);
+        y.add(word.slice(1, word.len()), index);
     }
 
     fn getCompletionTrieNode(& mut self, prefix: &str) -> Option<& HashMap<uint, uint>> {
@@ -52,7 +52,10 @@ impl<'a> CompletionTrie<'a> {
         let letter = prefix.char_at(0);
 
         match self.children.get_mut(&letter) {
-            n => return n.getCompletionTrieNode(prefix.slice(1, prefix.len())),
+            Some(n) => return n.getCompletionTrieNode(prefix.slice(1, prefix.len())),
+            None => {
+                return None
+            }
         };
 
     }
@@ -69,18 +72,18 @@ impl<'a> SuggestTree<'a> {
         }
     }
 
-    fn add(&mut self, word: Box<&'a str>) {
-        self.root.add(word.clone(), self.last_index);
-        self.completion_table.push(word);
+    fn add(&mut self, word: &'a str) {
+        self.root.add(word, self.last_index);
+        self.completion_table.push(String::from_str(word));
         self.last_index += 1;
     }
 
-    fn get_weights(& mut self, prefix: &str) -> HashMap<Box<&str>, uint> {
+    fn get_weights(& mut self, prefix: &str) -> HashMap<&String, uint> {
         let mut map = HashMap::new();
         match self.root.getCompletionTrieNode(prefix) {
             Some(n) => {
                 for (k, v) in n.iter() {
-                    //map.insert(self.completion_table[*k], *v);
+                    map.insert(&self.completion_table[*k], *v);
                 }
             },
             None => {
@@ -92,19 +95,16 @@ impl<'a> SuggestTree<'a> {
     }
 }
 
-fn read_file<'a>() {
-
-    let mut y = SuggestTree::new();
-        // Create a path to the desired file
-    let path = Path::new("/usr/share/dict/words");
-
-let mut file = BufferedReader::new(File::open(&path));
-    for line in file.lines().filter_map(|result| result.ok()) {
-    	let word: Box<&str> = box line.as_slice();
-        y.add(word);
-    }
-}
-
 fn main() {
-    read_file();
+    let mut y = SuggestTree::new();
+    let path = Path::new("/usr/share/dict/words");
+    let mut file = BufferedReader::new(File::open(&path));
+    for line in file.lines().filter_map(|result| result.ok()) {
+        y.add(line.as_slice());
+    }
+    y.add("hello");
+    let d = y.get_weights("hell");
+    for (k, v) in d.iter() {
+        println!("Words for prefix hell: {}", k);
+    }
 }
