@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::io::BufferedReader;
 use std::io::File;
-
+use std::io;
 struct SuggestTree<'a> {
     root: CompletionTrie<'a>,
     completion_table: Vec<String>,
@@ -99,12 +99,20 @@ fn main() {
     let mut y = SuggestTree::new();
     let path = Path::new("/usr/share/dict/words");
     let mut file = BufferedReader::new(File::open(&path));
+    println!("Starting to build dictionary.");
     for line in file.lines().filter_map(|result| result.ok()) {
-        y.add(line.as_slice());
+        y.add(line.as_slice().trim());
     }
-    y.add("hello");
-    let d = y.get_weights("hell");
-    for k in d.keys() {
-        println!("Words for prefix hell: {}", k);
+    println!("Finished building dictionary");
+
+    loop {
+        println!("\nEnter a prefix:");
+        let input = io::stdin().read_line().ok().expect("Failed to readline");
+        let t_input = input.as_slice().trim();
+        let d = y.get_weights(t_input);
+        println!("Words for prefix {}:", t_input);
+        for k in d.keys() {
+            println!("{}", k);
+        }
     }
 }
