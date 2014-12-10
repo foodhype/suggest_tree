@@ -70,7 +70,7 @@ impl<'a> SuggestTree<'a> {
     }
 
     fn add(&mut self, word: Box<&'a str>) {
-        self.root.add(word.clone(), self.last_index);
+        self.root.add(word, self.last_index);
         self.completion_table.push(word);
         self.last_index += 1;
     }
@@ -80,7 +80,7 @@ impl<'a> SuggestTree<'a> {
         match self.root.getCompletionTrieNode(prefix) {
             Some(n) => {
                 for (k, v) in n.iter() {
-                    //map.insert(self.completion_table[*k], *v);
+                    map.insert(self.completion_table[*k], *v);
                 }
             },
             None => {
@@ -92,19 +92,44 @@ impl<'a> SuggestTree<'a> {
     }
 }
 
-fn read_file<'a>() {
-
+fn main() {
     let mut y = SuggestTree::new();
-        // Create a path to the desired file
+//    y.add("hello");
+//    y.add("helloworld");
+    let d = y.get_weights("hell");
+    for (k, v) in d.iter() {
+        println!("Words for prefix hell: {}", k);
+    }
+
+    // Create a path to the desired file
     let path = Path::new("/usr/share/dict/words");
 
 let mut file = BufferedReader::new(File::open(&path));
     for line in file.lines().filter_map(|result| result.ok()) {
-    	let word: Box<&str> = box line.as_slice();
-        y.add(word);
-    }
-}
+    	let word = box line.as_slice();
 
-fn main() {
-    read_file();
+        y.add(word);
+	}
+
+
+/*
+    let display = path.display();
+
+    // Open the path in read-only mode, returns `IoResult<File>`
+    let mut file = match File::open(&path) {
+        // The `desc` field of `IoError` is a string that describes the error
+        Err(why) => {return;},
+        Ok(file) => file,
+    };
+
+    // Read the file contents into a string, returns `IoResult<String>`
+    match file.read_to_string() {
+        Err(why) => print!("couldn't read file"),
+        Ok(word) => {
+	    let word_slice = word.unwrap();
+            y.add(word_slice);
+        },
+    }
+*/
+    // `file` goes out of scope, and the "hello.txt" file gets closed
 }
