@@ -104,7 +104,7 @@ fn main() {
         y.add(line.as_slice().trim());
     }
     println!("Finished building dictionary");
-
+    /*
     loop {
         println!("\nEnter a prefix:");
         let input = io::stdin().read_line().ok().expect("Failed to readline");
@@ -114,5 +114,5 @@ fn main() {
         for k in d.keys() {
             println!("{}", k);
         }
-    }
+    }*/
 }
