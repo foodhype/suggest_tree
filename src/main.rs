@@ -44,7 +44,7 @@ impl<'a> CompletionTrie<'a> {
         y.add(word.slice(1, word.len()), index);
     }
 
-    fn getCompletionTrieNode(& mut self, prefix: &str) -> Option<& HashMap<uint, uint>> {
+    fn get_indexes(& mut self, prefix: &str) -> Option<& HashMap<uint, uint>> {
         if prefix.len() == 0 {
             return Some(&self.completion_weights);
         }
@@ -52,7 +52,7 @@ impl<'a> CompletionTrie<'a> {
         let letter = prefix.char_at(0);
 
         match self.children.get_mut(&letter) {
-            Some(n) => return n.getCompletionTrieNode(prefix.slice(1, prefix.len())),
+            Some(n) => return n.get_indexes(prefix.slice(1, prefix.len())),
             None => {
                 return None
             }
@@ -80,7 +80,7 @@ impl<'a> SuggestTree<'a> {
 
     fn get_weights(& mut self, prefix: &str) -> HashMap<&String, uint> {
         let mut map = HashMap::new();
-        match self.root.getCompletionTrieNode(prefix) {
+        match self.root.get_indexes(prefix) {
             Some(n) => {
                 for (k, v) in n.iter() {
                     map.insert(&self.completion_table[*k], *v);
@@ -104,7 +104,7 @@ fn main() {
     }
     y.add("hello");
     let d = y.get_weights("hell");
-    for (k, v) in d.iter() {
+    for k in d.keys() {
         println!("Words for prefix hell: {}", k);
     }
 }
