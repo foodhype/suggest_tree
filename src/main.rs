@@ -1,9 +1,10 @@
 use std::collections::HashMap;
-
+use std::io::BufferedReader;
+use std::io::File;
 
 struct SuggestTree<'a> {
     root: CompletionTrie<'a>,
-    completion_table: Vec<&'a str>,
+    completion_table: Vec<String>,
     //inverted_index: HashMap<&'a str, uint>,
     last_index: uint
 }
@@ -73,16 +74,16 @@ impl<'a> SuggestTree<'a> {
 
     fn add(&mut self, word: &'a str) {
         self.root.add(word, self.last_index);
-        self.completion_table.push(word);
+        self.completion_table.push(String::from_str(word));
         self.last_index += 1;
     }
 
-    fn get_weights(& mut self, prefix: &str) -> HashMap<&str, uint> {
+    fn get_weights(& mut self, prefix: &str) -> HashMap<&String, uint> {
         let mut map = HashMap::new();
         match self.root.getCompletionTrieNode(prefix) {
             Some(n) => {
                 for (k, v) in n.iter() {
-                    map.insert(self.completion_table[*k], *v);
+                    map.insert(&self.completion_table[*k], *v);
                 }
             },
             None => {
@@ -96,6 +97,11 @@ impl<'a> SuggestTree<'a> {
 
 fn main() {
     let mut y = SuggestTree::new();
+    let path = Path::new("/usr/share/dict/words");
+    let mut file = BufferedReader::new(File::open(&path));
+    for line in file.lines().filter_map(|result| result.ok()) {
+        y.add(line.as_slice());
+    }
     y.add("hello");
     let d = y.get_weights("hell");
     for (k, v) in d.iter() {
